@@ -5,11 +5,18 @@
     powershell -ExecutionPolicy Bypass -File scripts\setup.ps1 -AceStepHome C:\Projetos\ACE-Step-1.5
 #>
 param(
-    [string]$AceStepHome = "C:\Projetos\ACE-Step-1.5"
+    [string]$AceStepHome
 )
 
 $ErrorActionPreference = "Stop"
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
+
+# Default relativo: o backend vai para uma pasta IRMA do projeto, onde quer que
+# ele tenha sido clonado. Um caminho absoluto fixo quebraria para quem instala
+# fora de C:\Projetos.
+if (-not $AceStepHome) {
+    $AceStepHome = Join-Path (Split-Path -Parent $ProjectRoot) "ACE-Step-1.5"
+}
 
 Write-Host "== 1/5 Verificando uv ==" -ForegroundColor Cyan
 if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {

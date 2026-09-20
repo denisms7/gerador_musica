@@ -31,6 +31,9 @@ class ProviderHealth:
     running: int = 0
     avg_job_seconds: float | None = None
     detail: str | None = None
+    #: Modelo que o servidor reporta como default. E o que esta REALMENTE
+    #: carregado, que pode divergir do .env se o backend nao foi reiniciado.
+    active_model: str | None = None
 
     def __post_init__(self) -> None:
         if self.models is None:

@@ -13,7 +13,13 @@ from musicgen.domain.models import (
     StyleSpec,
     VocalGender,
 )
-from musicgen.services.prompt_builder import LANGUAGES, STYLE_PRESETS, build_caption, suggest_bpm
+from musicgen.services.prompt_builder import (
+    LANGUAGES,
+    PRESET_CATEGORIES,
+    STYLE_PRESETS,
+    build_caption,
+    suggest_bpm,
+)
 from musicgen.ui import components, state
 
 _TEMPLATE = """[Intro]
@@ -112,7 +118,14 @@ def render() -> None:
     # --------------------------------------------------------------- controles
     with panel:
         st.subheader("Estilo")
-        preset = st.selectbox("Preset", ["(personalizado)", *STYLE_PRESETS])
+        # Dois niveis: com quase trinta presets, uma lista unica seria longa
+        # demais para escolher com o olho.
+        category = st.selectbox("Categoria", ["(personalizado)", *PRESET_CATEGORIES])
+        if category == "(personalizado)":
+            preset = "(personalizado)"
+            st.caption("Descreva o estilo no campo abaixo.")
+        else:
+            preset = st.selectbox("Preset", PRESET_CATEGORIES[category])
         custom = st.text_area(
             "Descricao livre (em ingles, sobrescreve o preset)",
             height=90,

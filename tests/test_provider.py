@@ -212,3 +212,48 @@ def test_wait_survives_non_mapping_payload():
     job.remote_id = "id"
     states = list(Weird().wait(job, poll_interval_s=0.05, timeout_s=30))
     assert states[-1].status is JobStatus.SUCCEEDED
+
+
+def test_health_reports_active_model():
+    """Saber o modelo REALMENTE carregado distingue '.env errado' de 'backend nao
+    reiniciado' — sintomas identicos na tela, causas opostas."""
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/health":
+            return _ok({"status": "ok", "version": "1.5"})
+        if request.url.path == "/v1/models":
+            return _ok({
+                "models": [{"name": "acestep-v15-turbo", "is_default": True}],
+                "default_model": "acestep-v15-turbo",
+            })
+        return _ok({})
+
+    health = _provider(handler).health()
+    assert health.available
+    assert health.active_model == "acestep-v15-turbo"
+    assert health.models == ["acestep-v15-turbo"]
+
+
+def test_health_falls_back_to_is_default_flag():
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/health":
+            return _ok({"status": "ok"})
+        if request.url.path == "/v1/models":
+            return _ok({"models": [{"name": "a", "is_default": False},
+                                   {"name": "b", "is_default": True}]})
+        return _ok({})
+
+    assert _provider(handler).health().active_model == "b"
+
+
+def test_health_survives_missing_optional_endpoints():
+    """/v1/stats e /v1/models sao acessorios: sua ausencia nao pode derrubar o
+    health, senao a UI declara o backend offline com ele no ar."""
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/health":
+            return _ok({"status": "ok"})
+        return httpx.Response(404)
+
+    health = _provider(handler).health()
+    assert health.available
+    assert health.active_model is None
+    assert health.models == []

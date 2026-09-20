@@ -51,3 +51,45 @@ def test_all_presets_produce_captions():
 def test_suggest_bpm_matches_known_genre():
     assert suggest_bpm(StyleSpec(genres=["Samba"])) == 100
     assert suggest_bpm(StyleSpec(genres=["genero inexistente"])) is None
+
+
+class TestPresetCatalog:
+    def test_categories_cover_every_preset(self):
+        from musicgen.services.prompt_builder import PRESET_CATEGORIES
+
+        categorized = {name for names in PRESET_CATEGORIES.values() for name in names}
+        assert categorized == set(STYLE_PRESETS), (
+            "preset fora de categoria some da UI: "
+            f"{categorized ^ set(STYLE_PRESETS)}"
+        )
+
+    def test_no_preset_listed_in_two_categories(self):
+        from musicgen.services.prompt_builder import PRESET_CATEGORIES
+
+        flat = [n for names in PRESET_CATEGORIES.values() for n in names]
+        assert len(flat) == len(set(flat))
+
+    def test_requested_genres_are_present(self):
+        from musicgen.services.prompt_builder import PRESET_CATEGORIES
+
+        assert len(PRESET_CATEGORIES["Rock"]) >= 6
+        assert len(PRESET_CATEGORIES["Metal"]) >= 6
+        assert len(PRESET_CATEGORIES["Sertanejo"]) >= 6
+
+    def test_every_preset_has_genre_and_instruments(self):
+        for name, style in STYLE_PRESETS.items():
+            assert style.genres, f"{name} sem genero"
+            assert style.instruments or name == "Post-rock instrumental", f"{name} sem instrumentos"
+
+    def test_every_preset_suggests_a_bpm(self):
+        """Um preset sem BPM na tabela cai em 'automatico' silenciosamente."""
+        missing = [n for n, s in STYLE_PRESETS.items() if suggest_bpm(s) is None]
+        assert not missing, f"sem BPM sugerido: {missing}"
+
+    def test_bpm_values_are_plausible(self):
+        for name, style in STYLE_PRESETS.items():
+            bpm = suggest_bpm(style)
+            assert 40 <= bpm <= 220, f"{name}: bpm {bpm} fora da faixa"
+
+    def test_instrumental_preset_has_no_vocal_gender(self):
+        assert STYLE_PRESETS["Post-rock instrumental"].vocal_gender is VocalGender.UNSET

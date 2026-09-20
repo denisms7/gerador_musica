@@ -67,7 +67,35 @@ def render() -> None:
     sup = state.supervisor()
 
     st.subheader("Servidor de inferencia")
-    components.health_badge(state.provider().health(), sup)
+    health = state.provider().health()
+    components.health_badge(health, sup)
+
+    if health.available:
+        st.markdown("**Modelos**")
+        cols = st.columns(2)
+        cols[0].metric("Ativo no servidor", health.active_model or "nao reportado")
+        cols[1].metric("Configurado no .env", settings.dit_model)
+        if health.models:
+            st.caption("Disponiveis no servidor: " + ", ".join(health.models))
+
+        # O modelo carrega na PRIMEIRA requisicao e fica residente. Editar o .env
+        # sem reiniciar o backend nao troca nada — causa mais comum de "corrigi a
+        # configuracao e continua falhando".
+        if health.active_model and health.active_model != settings.dit_model:
+            st.warning(
+                f"O servidor esta com **{health.active_model}** carregado, mas o `.env` "
+                f"pede **{settings.dit_model}**. O modelo fica residente na VRAM depois "
+                "da primeira requisicao: **reinicie o servidor de inferencia** para a "
+                "troca valer.",
+                icon=":material/sync_problem:",
+            )
+        if health.models and settings.lm_model and settings.lm_model not in health.models:
+            st.info(
+                f"O LM `{settings.lm_model}` do `.env` nao aparece na lista do servidor. "
+                "Se so modelos menores estao listados, a sua VRAM nao comporta o "
+                "configurado — e a geracao falha exatamente na fase de audio codes.",
+                icon=":material/memory_alt:",
+            )
 
     problems = sup.preflight()
     if problems:

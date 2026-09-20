@@ -178,25 +178,40 @@ class AceStepApiProvider(MusicProvider):
         try:
             with self._client(timeout=5.0) as c:
                 info = self._unwrap(c.get("/health"))
-                try:
-                    stats = self._unwrap(c.get("/v1/stats"))
-                    jobs = stats.get("jobs", {})
-                except Exception:
-                    stats, jobs = {}, {}
-                try:
-                    models = [m["name"] for m in self._unwrap(c.get("/v1/models")).get("models", [])]
-                except Exception:
-                    models = []
+                stats, jobs = self._safe_get(c, "/v1/stats"), {}
+                jobs = stats.get("jobs", {}) if isinstance(stats, Mapping) else {}
+                models_payload = self._safe_get(c, "/v1/models")
+
+            entries = models_payload.get("models", []) if isinstance(models_payload, Mapping) else []
+            models = [m["name"] for m in entries if isinstance(m, Mapping) and m.get("name")]
+            active = models_payload.get("default_model") or next(
+                (m["name"] for m in entries if isinstance(m, Mapping) and m.get("is_default")),
+                None,
+            )
+
             return ProviderHealth(
                 available=info.get("status") == "ok",
                 version=info.get("version"),
                 models=models,
                 queued=jobs.get("queued", 0),
                 running=jobs.get("running", 0),
-                avg_job_seconds=stats.get("avg_job_seconds"),
+                avg_job_seconds=stats.get("avg_job_seconds") if isinstance(stats, Mapping) else None,
+                active_model=active,
             )
         except Exception as exc:
             return ProviderHealth(available=False, detail=str(exc))
+
+    @staticmethod
+    def _safe_get(client: httpx.Client, path: str) -> dict:
+        """GET tolerante: endpoints acessorios nao podem derrubar o health."""
+        try:
+            response = client.get(path)
+            response.raise_for_status()
+            body = response.json()
+            data = body.get("data") if isinstance(body, Mapping) else None
+            return data if isinstance(data, Mapping) else {}
+        except Exception:
+            return {}
 
     def submit(self, request: GenerationRequest) -> str:
         payload: dict = {
