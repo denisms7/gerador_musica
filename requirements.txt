@@ -1,0 +1,32 @@
+# ---------------------------------------------------------------------------
+# MusicGen Local - dependencias de runtime da aplicacao (UI + CLI + pipeline).
+#
+# NAO inclui o backend de inferencia: torch, vLLM e os pesos do ACE-Step vivem
+# no venv separado do ACE-Step (instalado via `uv sync` na pasta dele). Manter
+# os dois ambientes isolados e proposital - ver README, secao Arquitetura.
+#
+#   pip install -r requirements.txt
+#
+# Pins usam compatible-release (~=): aceita correcoes de patch/minor, bloqueia
+# quebras de major.
+# ---------------------------------------------------------------------------
+
+# UI
+streamlit~=1.64
+
+# Configuracao e validacao
+pydantic~=2.13
+pydantic-settings~=2.15
+python-dotenv~=1.2
+
+# Cliente HTTP do provider (usa httpx.MockTransport nos testes)
+httpx~=0.28
+
+# Audio: leitura/escrita e normalizacao de loudness
+soundfile~=0.14
+numpy~=2.2
+pyloudnorm~=0.2
+
+# CLI
+typer~=0.27
+rich~=15.0

@@ -1,0 +1,20 @@
+# ---------------------------------------------------------------------------
+# OPCIONAL - separacao em stems (vocal / bateria / baixo / outros) via Demucs.
+#
+# So instale se for ativar MUSICGEN_ENABLE_STEMS=true. Puxa torch (~2.5 GB) para
+# o venv da aplicacao, o que normalmente evitamos: o Demucs roda em subprocesso
+# justamente para que torch nunca seja importado dentro do processo do Streamlit.
+#
+# IMPORTANTE - build de CUDA:
+# a linha abaixo instala o torch de CPU, que funciona mas separa stems de forma
+# lenta. Para usar a GPU, instale o torch ANTES, pelo indice oficial, escolhendo
+# o build que corresponde ao seu driver em https://pytorch.org/get-started/locally/
+#
+#   pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu126
+#   pip install -r requirements-stems.txt
+# ---------------------------------------------------------------------------
+-r requirements.txt
+
+torch>=2.1
+torchaudio>=2.1
+demucs>=4.0

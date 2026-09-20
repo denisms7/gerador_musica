@@ -1,0 +1,51 @@
+[project]
+name = "musicgen"
+version = "0.1.0"
+description = "Gerador local de musica completa (voz + instrumental) a partir de letra, via ACE-Step 1.5"
+requires-python = ">=3.10"
+dependencies = [
+    "streamlit~=1.64",
+    "pydantic~=2.13",
+    "pydantic-settings~=2.15",
+    "python-dotenv~=1.2",
+    "httpx~=0.28",
+    "soundfile~=0.14",
+    "numpy~=2.2",
+    "pyloudnorm~=0.2",
+    "typer~=0.27",
+    "rich~=15.0",
+]
+
+[project.optional-dependencies]
+stems = ["torch>=2.1", "torchaudio>=2.1", "demucs>=4.0"]
+dev = ["pytest~=9.1", "pytest-cov~=7.0", "ruff~=0.16"]
+
+[project.scripts]
+musicgen = "musicgen.cli:app"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
+ignore = [
+    "B008",    # typer usa chamadas em defaults por design
+    "E501",    # line-length ja e validado pelo formatter
+    "RUF001",  # textos em pt-BR sem acento
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B", "SIM"]
+"app.py" = ["E402"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

@@ -1,0 +1,23 @@
+Metadata-Version: 2.4
+Name: musicgen
+Version: 0.1.0
+Summary: Gerador local de musica completa (voz + instrumental) a partir de letra, via ACE-Step 1.5
+Requires-Python: >=3.10
+Requires-Dist: streamlit~=1.64
+Requires-Dist: pydantic~=2.13
+Requires-Dist: pydantic-settings~=2.15
+Requires-Dist: python-dotenv~=1.2
+Requires-Dist: httpx~=0.28
+Requires-Dist: soundfile~=0.14
+Requires-Dist: numpy~=2.2
+Requires-Dist: pyloudnorm~=0.2
+Requires-Dist: typer~=0.27
+Requires-Dist: rich~=15.0
+Provides-Extra: stems
+Requires-Dist: torch>=2.1; extra == "stems"
+Requires-Dist: torchaudio>=2.1; extra == "stems"
+Requires-Dist: demucs>=4.0; extra == "stems"
+Provides-Extra: dev
+Requires-Dist: pytest~=9.1; extra == "dev"
+Requires-Dist: pytest-cov~=7.0; extra == "dev"
+Requires-Dist: ruff~=0.16; extra == "dev"

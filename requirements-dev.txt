@@ -1,0 +1,10 @@
+# ---------------------------------------------------------------------------
+# Ferramentas de desenvolvimento. Inclui o runtime.
+#
+#   pip install -r requirements-dev.txt
+# ---------------------------------------------------------------------------
+-r requirements.txt
+
+pytest~=9.1
+pytest-cov~=7.0
+ruff~=0.16

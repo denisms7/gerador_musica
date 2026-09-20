@@ -1,0 +1,28 @@
+# Ambientes e caches
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# Configuracao local (contem caminhos da maquina e chaves)
+.env
+
+# Saidas e banco
+data/
+*.db
+*.log
+
+# Certificados exportados da loja do Windows: sao especificos da maquina e
+# revelam o CA do antivirus/proxy da rede. Nunca versionar.
+certs/
+
+# Letras: criacao autoral, fora do repositorio por padrao.
+# Para versionar as suas, remova esta linha.
+letras/
+
+# Artefatos de build
+*.egg-info/
+build/
+dist/
